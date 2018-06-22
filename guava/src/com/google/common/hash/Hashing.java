@@ -402,6 +402,10 @@ public final class Hashing {
 
     public final HashFunction hashFunction;
 
+    @SuppressWarnings({
+      "nullness:assignment.type.incompatible",
+      "nullness:argument.type.incompatible"
+    }) // Fields required for instantiation of ChecksumHashFunction are already initialized
     ChecksumType(String toString) {
       this.hashFunction = new ChecksumHashFunction(this, 32, toString);
     }

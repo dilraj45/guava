@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.checkerframework.checker.nullness.qual.KeyFor;
 
 /**
  * Contains static utility methods pertaining to primitive types and their corresponding wrapper
@@ -75,7 +76,7 @@ public final class Primitives {
    *
    * @since 3.0
    */
-  public static Set<Class<?>> allPrimitiveTypes() {
+  public static Set<@KeyFor("PRIMITIVE_TO_WRAPPER_TYPE") Class<?>> allPrimitiveTypes() {
     return PRIMITIVE_TO_WRAPPER_TYPE.keySet();
   }
 
@@ -84,7 +85,7 @@ public final class Primitives {
    *
    * @since 3.0
    */
-  public static Set<Class<?>> allWrapperTypes() {
+  public static Set<@KeyFor("WRAPPER_TO_PRIMITIVE_TYPE") Class<?>> allWrapperTypes() {
     return WRAPPER_TO_PRIMITIVE_TYPE.keySet();
   }
 

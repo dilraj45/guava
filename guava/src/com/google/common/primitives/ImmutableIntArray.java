@@ -564,17 +564,17 @@ public final class ImmutableIntArray implements Serializable {
     }
 
     @Override
-    public boolean contains(Object target) {
+    public boolean contains(@Nullable Object target) {
       return indexOf(target) >= 0;
     }
 
     @Override
-    public @GTENegativeOne int indexOf(Object target) {
+    public @GTENegativeOne int indexOf(@Nullable Object target) {
       return target instanceof Integer ? parent.indexOf((Integer) target) : -1;
     }
 
     @Override
-    public @GTENegativeOne int lastIndexOf(Object target) {
+    public @GTENegativeOne int lastIndexOf(@Nullable Object target) {
       return target instanceof Integer ? parent.lastIndexOf((Integer) target) : -1;
     }
 

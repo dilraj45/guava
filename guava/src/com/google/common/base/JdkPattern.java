@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /** A regex pattern implementation which is backed by the {@link Pattern}. */
 @GwtIncompatible
@@ -55,7 +56,7 @@ final class JdkPattern extends CommonPattern implements Serializable {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(@Nullable Object o) {
     if (!(o instanceof JdkPattern)) {
       return false;
     }

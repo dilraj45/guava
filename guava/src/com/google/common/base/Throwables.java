@@ -252,6 +252,8 @@ public final class Throwables {
    *
    * @throws IllegalArgumentException if there is a loop in the causal chain
    */
+  @SuppressWarnings("nullness:dereference.of.nullable") // slowPointer will never be null. Fast
+  // pointer encounters null prior to slowPointer and terminates the loop.
   public static Throwable getRootCause(Throwable throwable) {
     // Keep a second pointer that slowly walks the causal chain. If the fast pointer ever catches
     // the slower pointer, then there's a loop.
@@ -290,6 +292,8 @@ public final class Throwables {
    * @throws IllegalArgumentException if there is a loop in the causal chain
    */
   @Beta // TODO(kevinb): decide best return type
+  @SuppressWarnings("nullness:dereference.of.nullable") // slowPointer will never be null. Fast
+  // pointer encounters null prior to slowPointer and terminates the loop.
   public static List<Throwable> getCausalChain(Throwable throwable) {
     checkNotNull(throwable);
     List<Throwable> causes = new ArrayList<>(4);
@@ -331,7 +335,7 @@ public final class Throwables {
    */
   @Beta
   @GwtIncompatible // Class.cast(Object)
-  public static <X extends Throwable> X getCauseAs(
+  public static <X extends Throwable> @Nullable X getCauseAs(
       Throwable throwable, Class<X> expectedCauseType) {
     try {
       return expectedCauseType.cast(throwable.getCause());
@@ -385,7 +389,7 @@ public final class Throwables {
   @Beta
   @GwtIncompatible // lazyStackTraceIsLazy, jlaStackTrace
   // TODO(cpovirk): Consider making this available under GWT (slow implementation only).
-  public static List<StackTraceElement> lazyStackTrace(Throwable throwable) {
+  public static List<@Nullable StackTraceElement> lazyStackTrace(Throwable throwable) {
     return lazyStackTraceIsLazy()
         ? jlaStackTrace(throwable)
         : unmodifiableList(asList(throwable.getStackTrace()));
@@ -404,7 +408,7 @@ public final class Throwables {
   }
 
   @GwtIncompatible // invokeAccessibleNonThrowingMethod
-  private static List<StackTraceElement> jlaStackTrace(final Throwable t) {
+  private static List<@Nullable StackTraceElement> jlaStackTrace(final Throwable t) {
     checkNotNull(t);
     /*
      * TODO(cpovirk): Consider optimizing iterator() to catch IOOBE instead of doing bounds checks.
@@ -412,9 +416,9 @@ public final class Throwables {
      * TODO(cpovirk): Consider the UnsignedBytes pattern if it performs faster and doesn't cause
      * AOSP grief.
      */
-    return new AbstractList<StackTraceElement>() {
+    return new AbstractList<@Nullable StackTraceElement>() {
       @Override
-      public StackTraceElement get(int n) {
+      public @Nullable StackTraceElement get(int n) {
         return (StackTraceElement)
             invokeAccessibleNonThrowingMethod(getStackTraceElementMethod, jla, t, n);
       }
@@ -427,7 +431,9 @@ public final class Throwables {
   }
 
   @GwtIncompatible // java.lang.reflect
-  private static Object invokeAccessibleNonThrowingMethod(
+  // todo (dilraj45): Method e.getCause can return null and passing a null value to propagate throws
+  // a NullPointerException. Potential Bug, confirm its behaviour.
+  private static @Nullable Object invokeAccessibleNonThrowingMethod(
       Method method, Object receiver, Object... params) {
     try {
       return method.invoke(receiver, params);
@@ -472,6 +478,8 @@ public final class Throwables {
    * AppEngine, and not present in non-Sun JDKs.
    */
   @GwtIncompatible // java.lang.reflect
+  @SuppressWarnings("nullness:argument.type.incompatible") // Suppressing conservatively issued
+  // warning. The method 'invoke' here refers to the version that permits null as an argument.
   private static @Nullable Object getJLA() {
     try {
       /*
@@ -511,6 +519,8 @@ public final class Throwables {
    * UnsupportedOperationException</a>.
    */
   @GwtIncompatible // java.lang.reflect
+  @SuppressWarnings("nullness:argument.type.incompatible") // Suppressing conservatively issued
+  // warning. The method 'invoke' here refers to version that permits null as an argument.
   private static @Nullable Method getSizeMethod() {
     try {
       Method getStackTraceDepth = getJlaMethod("getStackTraceDepth", Throwable.class);

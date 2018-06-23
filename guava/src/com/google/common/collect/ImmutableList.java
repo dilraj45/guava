@@ -355,7 +355,7 @@ public abstract class ImmutableList<E extends @NonNull Object> extends Immutable
   }
 
   /** Views the array as an immutable list. Checks for nulls; does not copy. */
-  private static <E> ImmutableList<E> construct(Object... elements) {
+  private static <E extends @NonNull Object> ImmutableList<E> construct(Object... elements) {
     return asImmutableList(checkElementsNotNull(elements));
   }
 
@@ -364,7 +364,7 @@ public abstract class ImmutableList<E extends @NonNull Object> extends Immutable
    *
    * <p>The array must be internally created.
    */
-  static <E> ImmutableList<E> asImmutableList(Object[] elements) {
+  static <E extends @NonNull Object> ImmutableList<E> asImmutableList(Object[] elements) {
     return asImmutableList(elements, elements.length);
   }
 
@@ -372,7 +372,11 @@ public abstract class ImmutableList<E extends @NonNull Object> extends Immutable
    * Views the array as an immutable list. Copies if the specified range does not cover the complete
    * array. Does not check for nulls.
    */
-  static <E> ImmutableList<E> asImmutableList(Object[] elements, int length) {
+  // Annotation specification for this method is technically incorrect. This method can also accept
+  // a @Nullable Object[] in case all the elements of array with index less than length are non-null
+  @SuppressWarnings("nullness:assignment.type.incompatible") // Specified length for copyOf method
+  // is always less than the length of original array.
+  static <E extends @NonNull Object> ImmutableList<E> asImmutableList(Object[] elements, int length) {
     switch (length) {
       case 0:
         return of();
@@ -589,7 +593,7 @@ public abstract class ImmutableList<E extends @NonNull Object> extends Immutable
   }
 
   @Override
-  int copyIntoArray(Object[] dst, int offset) {
+  int copyIntoArray(@Nullable Object[] dst, int offset) {
     // this loop is faster for RandomAccess instances, which ImmutableLists are
     int size = size();
     for (int i = 0; i < size; i++) {
@@ -609,7 +613,7 @@ public abstract class ImmutableList<E extends @NonNull Object> extends Immutable
     return (size() <= 1) ? this : new ReverseImmutableList<E>(this);
   }
 
-  private static class ReverseImmutableList<E> extends ImmutableList<E> {
+  private static class ReverseImmutableList<E extends @NonNull Object> extends ImmutableList<E> {
     private final transient ImmutableList<E> forwardList;
 
     ReverseImmutableList(ImmutableList<E> backingList) {
@@ -718,7 +722,7 @@ public abstract class ImmutableList<E extends @NonNull Object> extends Immutable
    * Returns a new builder. The generated builder is equivalent to the builder created by the {@link
    * Builder} constructor.
    */
-  public static <E> Builder<E> builder() {
+  public static <E extends @NonNull Object> Builder<E> builder() {
     return new Builder<E>();
   }
 
@@ -735,7 +739,7 @@ public abstract class ImmutableList<E extends @NonNull Object> extends Immutable
    * @since 23.1
    */
   @Beta
-  public static <E> Builder<E> builderWithExpectedSize(int expectedSize) {
+  public static <E extends @NonNull Object> Builder<E> builderWithExpectedSize(int expectedSize) {
     checkNonnegative(expectedSize, "expectedSize");
     return new ImmutableList.Builder<E>(expectedSize);
   }
@@ -760,8 +764,9 @@ public abstract class ImmutableList<E extends @NonNull Object> extends Immutable
    *
    * @since 2.0
    */
-  public static final class Builder<E> extends ImmutableCollection.Builder<E> {
-    @VisibleForTesting Object[] contents;
+  public static final class Builder<E extends @NonNull Object>
+      extends ImmutableCollection.Builder<E> {
+    @VisibleForTesting @Nullable Object[] contents;
     private int size;
     private boolean forceCopy;
 
@@ -819,7 +824,7 @@ public abstract class ImmutableList<E extends @NonNull Object> extends Immutable
       return this;
     }
 
-    private void add(Object[] elements, int n) {
+    private void add(@Nullable Object[] elements, int n) {
       getReadyToExpandTo(size + n);
       System.arraycopy(elements, 0, contents, size, n);
       size += n;
@@ -874,6 +879,8 @@ public abstract class ImmutableList<E extends @NonNull Object> extends Immutable
      * Returns a newly-created {@code ImmutableList} based on the contents of the {@code Builder}.
      */
     @Override
+    @SuppressWarnings("nullness:argument.type.incompatible") // All the elements within specified
+    // range are non-null. Refer to note on asImmutableList
     public ImmutableList<E> build() {
       forceCopy = true;
       return asImmutableList(contents, size);

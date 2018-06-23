@@ -187,6 +187,8 @@ public abstract class ImmutableCollection<E extends @NonNull Object> extends Abs
   private static final Object[] EMPTY_ARRAY = {};
 
   @Override
+  @SuppressWarnings("nullness:override.return.invalid") // Suppressed due to annotations of toArray.
+  // refer to note on toArray
   public final @Nullable Object[] toArray() {
     int size = size();
     if (size == 0) {
@@ -199,7 +201,9 @@ public abstract class ImmutableCollection<E extends @NonNull Object> extends Abs
 
   @CanIgnoreReturnValue
   @Override
-  public final <T> @Nullable T[] toArray(T[] other) {
+  @SuppressWarnings({"nullness:override.param.invalid", "nullness:override.return.invalid"})
+  // Suppressed due to annotations of toArray, refer to note on toArray
+  public final <T> @Nullable T[] toArray(@Nullable T[] other) {
     checkNotNull(other);
     int size = size();
     if (other.length < size) {
@@ -338,7 +342,7 @@ public abstract class ImmutableCollection<E extends @NonNull Object> extends Abs
    * offset. Returns {@code offset + size()}.
    */
   @CanIgnoreReturnValue
-  int copyIntoArray(Object[] dst, int offset) {
+  int copyIntoArray(@Nullable Object[] dst, int offset) {
     for (E e : this) {
       dst[offset++] = e;
     }
@@ -355,7 +359,7 @@ public abstract class ImmutableCollection<E extends @NonNull Object> extends Abs
    *
    * @since 10.0
    */
-  public abstract static class Builder<E> {
+  public abstract static class Builder<E extends @NonNull Object> {
     static final int DEFAULT_INITIAL_CAPACITY = 4;
 
     static int expandedCapacity(int oldCapacity, int minCapacity) {

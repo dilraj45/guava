@@ -52,7 +52,9 @@ public final class MoreObjects {
    * @throws NullPointerException if both {@code first} and {@code second} are null
    * @since 18.0 (since 3.0 as {@code Objects.firstNonNull()}).
    */
-  public static <T> @NonNull T firstNonNull(T first, T second) {
+  // It throws a NullPointerException if both first and second are null. It is thus annotated to
+  // conservatively issue warning even if one of them is of type @Nullable
+  public static <T> @NonNull T firstNonNull(@NonNull T first, @NonNull T second) {
     if (first != null) {
       return first;
     }
